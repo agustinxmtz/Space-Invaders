@@ -5,6 +5,7 @@ let width = 15
 let direction = 1
 let invadersId
 let goingRight = true
+let aliensRemoved = []
 
 for (let i = 0; i < 225; i++ ) {
     const square = document.createElement('div')
@@ -21,7 +22,11 @@ const alienInvaders = [
 
 function draw() {
     for (let i = 0; i < alienInvaders.length; i++) {
-        squares[alienInvaders[i]].classList.add('invader')
+        if(!aliensRemoved.includes(i)) {
+            squares[alienInvaders[i]].classList.add('invader')
+
+        }
+        
     }
 }
 
@@ -34,7 +39,7 @@ function remove() {
 }
 
 
-// squares[currentShooterIndex].classList.add('shooter')
+squares[currentShooterIndex].classList.add('shooter')
 
 function moveShooter(e) {
     squares[currentShooterIndex].classList.remove('shooter')
@@ -77,12 +82,7 @@ function moveInvaders() {
 
     draw()
 
-    if (squre[currentShooterIndex].classList.contains('invader', 'shooter')) {
-        resultsDisplay.innerHTML = 'GAME OVER'
-        clearInterval(invadersId)
-    }
-
-    if (squre[currentShooterIndex].classList.contains('invader', 'shooter')) {
+    if (squares[currentShooterIndex].classList.contains('invader', 'shooter')) {
         resultsDisplay.innerHTML = 'GAME OVER'
         clearInterval(invadersId)
     }
@@ -90,9 +90,47 @@ function moveInvaders() {
     for (let i = 0; i < alienInvaders.length; i++) {
         if(alienInvaders[i] > (squares.length)) {
             resultsDisplay.innerHTML = 'GAME OVER'
+            clearInterval(invadersId)
         }
+    }
+    if (aliensRemoved.length === alienInvaders.length) {
+        resultsDisplay.innerHTML = 'YOU WIN'
+        clearInterval(invadersId)
+
     }
 
 }
 
-invadersId = setInterval(moveInvaders, 500)
+invadersId = setInterval(moveInvaders, 100)
+
+function shoot(e) {
+    let laserId
+    let currentLaserIndex = currentShooterIndex
+    function moveLaser() {
+        squares[currentLaserIndex].classList.remove('laser')
+        currentLaserIndex -= width
+        squares[currentLaserIndex].classList.add('laser')
+
+        if (squares[currentLaserIndex].classList.contains('invader')) {
+            squares[currentLaserIndex].classList.remove('laser')
+            squares[currentLaserIndex].classList.remove('invader')
+            squares[currentLaserIndex].classList.add('boom')
+
+            setTimeout(() => squares[currentLaserIndex].classList.remove('boom'), 300)
+            clearInterval(laserId)
+
+            const alienRemoved = alienInvaders.indexOf(currentLaserIndex)
+            aliensRemoved.push(alienRemoved)
+
+        }
+
+    }
+
+    switch(e.key) {
+        case 'ArrowUp':
+            laserId = setInterval(moveLaser, 100)
+    }
+
+}
+
+document.addEventListener('keydown', shoot)
